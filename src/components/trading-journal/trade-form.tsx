@@ -24,12 +24,20 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { ToggleGroup } from "@/components/ui/toggle-group"
 import { Toggle } from "@/components/ui/toggle"
 import { Trade } from "@/lib/types"
 import { TradeSchema, type TradeFormValues } from "@/lib/schemas"
 import { PlusIcon, PencilIcon, ArrowUpIcon, ArrowDownIcon } from "lucide-react"
 import { useMediaQuery } from "@/hooks/use-media-query"
+import { useTradeStore } from "@/store/trade-store"
 
 interface TradeFormProps {
   onAddTrade: (trade: Trade) => void
@@ -44,6 +52,7 @@ export function TradeForm({ onAddTrade, onEditTrade, editTrade, open: controlled
   const [tags, setTags] = useState<string[]>([])
   const [tagInput, setTagInput] = useState("")
   const isMobile = useMediaQuery("(max-width: 767px)")
+  const accounts = useTradeStore((s) => s.accounts)
 
   const isEditing = !!editTrade
   const open = controlledOpen ?? internalOpen
@@ -67,6 +76,9 @@ export function TradeForm({ onAddTrade, onEditTrade, editTrade, open: controlled
       status: "closed",
       notes: "",
       tags: [],
+      stopLoss: "",
+      takeProfit: "",
+      account: "Main",
     },
   })
 
@@ -82,6 +94,9 @@ export function TradeForm({ onAddTrade, onEditTrade, editTrade, open: controlled
         status: editTrade.status,
         notes: editTrade.notes,
         tags: editTrade.tags,
+        stopLoss: editTrade.stopLoss ? String(editTrade.stopLoss) : "",
+        takeProfit: editTrade.takeProfit ? String(editTrade.takeProfit) : "",
+        account: editTrade.account,
       })
       setTags(editTrade.tags)
     }
@@ -121,6 +136,9 @@ export function TradeForm({ onAddTrade, onEditTrade, editTrade, open: controlled
       status: data.status,
       notes: data.notes ?? "",
       tags,
+      stopLoss: data.stopLoss ? Number(data.stopLoss) : null,
+      takeProfit: data.takeProfit ? Number(data.takeProfit) : null,
+      account: data.account ?? "Main",
     }
 
     if (isEditing && onEditTrade) {
@@ -155,48 +173,49 @@ export function TradeForm({ onAddTrade, onEditTrade, editTrade, open: controlled
         </div>
       </div>
 
-      <div className="grid gap-2">
-        <Label>Direction</Label>
-        <Controller
-          control={control}
-          name="direction"
-          render={({ field }) => (
-            <ToggleGroup
-              value={[field.value]}
-              onValueChange={(v) => { if (v.length > 0) field.onChange(v[0]) }}
-            >
-              <Toggle value="long" variant={field.value === "long" ? "default" : "outline"} size="sm">
-                <ArrowUpIcon className="size-3.5 text-green-600" />
-                Long
-              </Toggle>
-              <Toggle value="short" variant={field.value === "short" ? "default" : "outline"} size="sm">
-                <ArrowDownIcon className="size-3.5 text-red-600" />
-                Short
-              </Toggle>
-            </ToggleGroup>
-          )}
-        />
-      </div>
-
-      <div className="grid gap-2">
-        <Label>Status</Label>
-        <Controller
-          control={control}
-          name="status"
-          render={({ field }) => (
-            <ToggleGroup
-              value={[field.value]}
-              onValueChange={(v) => { if (v.length > 0 && (v[0] === "open" || v[0] === "closed")) field.onChange(v[0]) }}
-            >
-              <Toggle value="closed" variant={field.value === "closed" ? "default" : "outline"} size="sm">
-                Closed
-              </Toggle>
-              <Toggle value="open" variant={field.value === "open" ? "default" : "outline"} size="sm">
-                Open
-              </Toggle>
-            </ToggleGroup>
-          )}
-        />
+      <div className="grid grid-cols-2 gap-4">
+        <div className="grid gap-2">
+          <Label>Direction</Label>
+          <Controller
+            control={control}
+            name="direction"
+            render={({ field }) => (
+              <ToggleGroup
+                value={[field.value]}
+                onValueChange={(v) => { if (v.length > 0) field.onChange(v[0]) }}
+              >
+                <Toggle value="long" variant={field.value === "long" ? "default" : "outline"} size="sm">
+                  <ArrowUpIcon className="size-3.5 text-green-600" />
+                  Long
+                </Toggle>
+                <Toggle value="short" variant={field.value === "short" ? "default" : "outline"} size="sm">
+                  <ArrowDownIcon className="size-3.5 text-red-600" />
+                  Short
+                </Toggle>
+              </ToggleGroup>
+            )}
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label>Status</Label>
+          <Controller
+            control={control}
+            name="status"
+            render={({ field }) => (
+              <ToggleGroup
+                value={[field.value]}
+                onValueChange={(v) => { if (v.length > 0 && (v[0] === "open" || v[0] === "closed")) field.onChange(v[0]) }}
+              >
+                <Toggle value="closed" variant={field.value === "closed" ? "default" : "outline"} size="sm">
+                  Closed
+                </Toggle>
+                <Toggle value="open" variant={field.value === "open" ? "default" : "outline"} size="sm">
+                  Open
+                </Toggle>
+              </ToggleGroup>
+            )}
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -215,6 +234,37 @@ export function TradeForm({ onAddTrade, onEditTrade, editTrade, open: controlled
       <div className="grid gap-2">
         <Label htmlFor="exitPrice">Exit Price</Label>
         <Input id="exitPrice" type="number" step="0.01" placeholder="Leave empty if open" {...register("exitPrice")} />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="grid gap-2">
+          <Label htmlFor="stopLoss">Stop Loss</Label>
+          <Input id="stopLoss" type="number" step="0.01" placeholder="Optional" {...register("stopLoss")} />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="takeProfit">Take Profit</Label>
+          <Input id="takeProfit" type="number" step="0.01" placeholder="Optional" {...register("takeProfit")} />
+        </div>
+      </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="account">Account</Label>
+        <Controller
+          control={control}
+          name="account"
+          render={({ field }) => (
+            <Select value={field.value ?? "Main"} onValueChange={field.onChange}>
+              <SelectTrigger id="account">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {accounts.map((a) => (
+                  <SelectItem key={a} value={a}>{a}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
       </div>
 
       <div className="grid gap-2">

@@ -6,10 +6,25 @@ import { TradeForm } from "@/components/trading-journal/trade-form"
 import { DataTable } from "@/components/trading-journal/data-table"
 import { columns } from "@/components/trading-journal/columns"
 import { Separator } from "@/components/ui/separator"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
+import { useState } from "react"
 
 export default function Home() {
   const trades = useTradeStore((s) => s.trades)
   const addTrade = useTradeStore((s) => s.addTrade)
+  const accounts = useTradeStore((s) => s.accounts)
+  const [accountFilter, setAccountFilter] = useState("all")
+
+  const filteredTrades = accountFilter === "all"
+    ? trades
+    : trades.filter((t) => t.account === accountFilter)
 
   return (
     <div className="flex flex-col gap-6">
@@ -23,13 +38,31 @@ export default function Home() {
         <TradeForm onAddTrade={addTrade} />
       </div>
 
-      <DashboardStats trades={trades} />
+      <DashboardStats trades={filteredTrades} />
 
       <Separator />
 
       <div>
-        <h2 className="mb-4 text-lg font-semibold">Trade History</h2>
-        <DataTable columns={columns} data={trades} />
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Trade History</h2>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="account-filter" className="text-sm text-muted-foreground">
+              Account
+            </Label>
+            <Select value={accountFilter} onValueChange={(v) => v && setAccountFilter(v)}>
+              <SelectTrigger id="account-filter" className="w-36">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                {accounts.map((a) => (
+                  <SelectItem key={a} value={a}>{a}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <DataTable columns={columns} data={filteredTrades} />
       </div>
     </div>
   )

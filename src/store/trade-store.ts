@@ -1,4 +1,5 @@
 import { create } from "zustand"
+import { persist } from "zustand/middleware"
 import { Trade } from "@/lib/types"
 import { trades as initialTrades } from "@/lib/data"
 
@@ -8,26 +9,51 @@ interface TradeStore {
   trades: Trade[]
   currency: Currency
   showValues: boolean
+  accounts: string[]
   addTrade: (trade: Trade) => void
   updateTrade: (id: string, trade: Trade) => void
   deleteTrade: (id: string) => void
+  deleteAllTrades: () => void
   setCurrency: (currency: Currency) => void
   toggleShowValues: () => void
+  addAccount: (name: string) => void
+  removeAccount: (name: string) => void
+  importTrades: (trades: Trade[]) => void
+  getExportData: () => Trade[]
 }
 
-export const useTradeStore = create<TradeStore>((set) => ({
-  trades: initialTrades,
-  currency: "usd",
-  showValues: true,
-  addTrade: (trade) => set((state) => ({ trades: [trade, ...state.trades] })),
-  updateTrade: (id, updated) =>
-    set((state) => ({
-      trades: state.trades.map((t) => (t.id === id ? updated : t)),
-    })),
-  deleteTrade: (id) =>
-    set((state) => ({
-      trades: state.trades.filter((t) => t.id !== id),
-    })),
-  setCurrency: (currency) => set({ currency }),
-  toggleShowValues: () => set((state) => ({ showValues: !state.showValues })),
-}))
+export const useTradeStore = create<TradeStore>()(
+  persist(
+    (set, get) => ({
+      trades: initialTrades,
+      currency: "usd",
+      showValues: true,
+      accounts: ["Main", "Long-term", "Short-term", "Crypto", "Forex"],
+      addTrade: (trade) => set((state) => ({ trades: [trade, ...state.trades] })),
+      updateTrade: (id, updated) =>
+        set((state) => ({
+          trades: state.trades.map((t) => (t.id === id ? updated : t)),
+        })),
+      deleteTrade: (id) =>
+        set((state) => ({
+          trades: state.trades.filter((t) => t.id !== id),
+        })),
+      deleteAllTrades: () => set({ trades: [] }),
+      setCurrency: (currency) => set({ currency }),
+      toggleShowValues: () => set((state) => ({ showValues: !state.showValues })),
+      addAccount: (name) =>
+        set((state) => ({
+          accounts: state.accounts.includes(name) ? state.accounts : [...state.accounts, name],
+        })),
+      removeAccount: (name) =>
+        set((state) => ({
+          accounts: state.accounts.filter((a) => a !== name),
+        })),
+      importTrades: (trades) => set({ trades }),
+      getExportData: () => get().trades,
+    }),
+    {
+      name: "trading-journal-storage",
+    },
+  ),
+)

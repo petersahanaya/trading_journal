@@ -1,5 +1,4 @@
 export type TradeDirection = "long" | "short"
-
 export type TradeStatus = "open" | "closed"
 
 export interface Trade {
@@ -14,4 +13,7 @@ export interface Trade {
   status: TradeStatus
   notes: string
   tags: string[]
+  stopLoss: number | null
+  takeProfit: number | null
+  account: string
 }

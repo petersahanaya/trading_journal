@@ -54,6 +54,19 @@ function ActionsCell({ trade }: { trade: Trade }) {
   )
 }
 
+function SortHeader({ column, label }: { column: any; label: string }) {
+  return (
+    <Button
+      variant="ghost"
+      size="xs"
+      onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+    >
+      {label}
+      <ArrowUpDownIcon className="ml-1 size-3" />
+    </Button>
+  )
+}
+
 export const columns: ColumnDef<Trade>[] = [
   {
     id: "actions",
@@ -62,30 +75,12 @@ export const columns: ColumnDef<Trade>[] = [
   },
   {
     accessorKey: "date",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        size="xs"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Date
-        <ArrowUpDownIcon className="ml-1 size-3" />
-      </Button>
-    ),
+    header: ({ column }) => <SortHeader column={column} label="Date" />,
     cell: ({ row }) => <span className="font-medium whitespace-nowrap">{row.getValue("date")}</span>,
   },
   {
     accessorKey: "ticker",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        size="xs"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Ticker
-        <ArrowUpDownIcon className="ml-1 size-3" />
-      </Button>
-    ),
+    header: ({ column }) => <SortHeader column={column} label="Ticker" />,
     cell: ({ row }) => <span className="font-semibold">{row.getValue("ticker")}</span>,
   },
   {
@@ -125,16 +120,7 @@ export const columns: ColumnDef<Trade>[] = [
   },
   {
     accessorKey: "pnl",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        size="xs"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        P&L
-        <ArrowUpDownIcon className="ml-1 size-3" />
-      </Button>
-    ),
+    header: ({ column }) => <SortHeader column={column} label="P&L" />,
     cell: ({ row }) => {
       const pnl = row.getValue("pnl") as number | null
       if (pnl === null) return "—"
@@ -158,6 +144,30 @@ export const columns: ColumnDef<Trade>[] = [
           {status}
         </Badge>
       )
+    },
+  },
+  {
+    accessorKey: "stopLoss",
+    header: "Stop",
+    cell: ({ row }) => {
+      const sl = row.getValue("stopLoss") as number | null
+      return sl !== null ? `$${sl.toFixed(2)}` : "—"
+    },
+  },
+  {
+    accessorKey: "takeProfit",
+    header: "Target",
+    cell: ({ row }) => {
+      const tp = row.getValue("takeProfit") as number | null
+      return tp !== null ? `$${tp.toFixed(2)}` : "—"
+    },
+  },
+  {
+    accessorKey: "account",
+    header: "Account",
+    cell: ({ row }) => {
+      const account = row.getValue("account") as string
+      return <span className="text-xs text-muted-foreground">{account}</span>
     },
   },
   {

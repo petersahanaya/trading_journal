@@ -13,6 +13,9 @@ export const trades: Trade[] = [
     status: "closed",
     notes: "Momentum play ahead of earnings. Sold into strength.",
     tags: ["swing", "earnings"],
+    stopLoss: 122.00,
+    takeProfit: 134.00,
+    account: "Main",
   },
   {
     id: "2",
@@ -26,6 +29,9 @@ export const trades: Trade[] = [
     status: "closed",
     notes: "Resistance at $350, short on rejection.",
     tags: ["day", "resistance"],
+    stopLoss: 352.00,
+    takeProfit: 330.00,
+    account: "Main",
   },
   {
     id: "3",
@@ -39,6 +45,9 @@ export const trades: Trade[] = [
     status: "open",
     notes: "Still holding, waiting for breakout above $190.",
     tags: ["swing", "breakout"],
+    stopLoss: 180.00,
+    takeProfit: 195.00,
+    account: "Long-term",
   },
   {
     id: "4",
@@ -52,6 +61,9 @@ export const trades: Trade[] = [
     status: "closed",
     notes: "Stop loss hit. Broke below support.",
     tags: ["day", "stop-loss"],
+    stopLoss: 158.00,
+    takeProfit: 168.00,
+    account: "Main",
   },
   {
     id: "5",
@@ -65,10 +77,15 @@ export const trades: Trade[] = [
     status: "closed",
     notes: "Trend following on index bounce.",
     tags: ["swing", "index"],
+    stopLoss: 525.00,
+    takeProfit: 540.00,
+    account: "Main",
   },
 ]
 
 export const tags = ["swing", "day", "scalp", "earnings", "breakout", "resistance", "support", "stop-loss", "index"]
+
+export const accountOptions = ["Main", "Long-term", "Short-term", "Crypto", "Forex"]
 
 export function calculateWinRate(trades: Trade[]): number {
   const closed = trades.filter((t) => t.status === "closed")
@@ -87,4 +104,37 @@ export function calculateTotalTrades(trades: Trade[]): number {
 
 export function calculateOpenTrades(trades: Trade[]): number {
   return trades.filter((t) => t.status === "open").length
+}
+
+export function calculateDailyPnl(trades: Trade[]): { date: string; pnl: number }[] {
+  const map: Record<string, number> = {}
+  for (const t of trades) {
+    if (t.pnl !== null) {
+      map[t.date] = (map[t.date] ?? 0) + t.pnl
+    }
+  }
+  return Object.entries(map)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, pnl]) => ({ date, pnl }))
+}
+
+export interface PositionSizeResult {
+  riskPerShare: number
+  positionSize: number
+  totalRisk: number
+  shares: number
+}
+
+export function calculatePositionSize(
+  accountBalance: number,
+  riskPercent: number,
+  entryPrice: number,
+  stopPrice: number,
+): PositionSizeResult {
+  const riskAmount = accountBalance * (riskPercent / 100)
+  const riskPerShare = Math.abs(entryPrice - stopPrice)
+  const shares = Math.floor(riskAmount / riskPerShare)
+  const positionSize = shares * entryPrice
+  const totalRisk = shares * riskPerShare
+  return { riskPerShare, positionSize, totalRisk, shares }
 }

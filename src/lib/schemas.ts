@@ -1,7 +1,6 @@
 import * as v from "valibot"
 
 export const TradeDirectionSchema = v.picklist(["long", "short"])
-
 export const TradeStatusSchema = v.picklist(["open", "closed"])
 
 export const TradeSchema = v.object({
@@ -14,6 +13,9 @@ export const TradeSchema = v.object({
   status: TradeStatusSchema,
   notes: v.optional(v.string()),
   tags: v.array(v.string()),
+  stopLoss: v.optional(v.string()),
+  takeProfit: v.optional(v.string()),
+  account: v.optional(v.string()),
 })
 
 export type TradeFormValues = v.InferInput<typeof TradeSchema>
