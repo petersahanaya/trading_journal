@@ -1,10 +1,12 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { Trade } from "@/lib/types"
 import { formatCurrency } from "@/lib/currency"
 import { useTradeStore } from "@/store/trade-store"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
@@ -16,11 +18,11 @@ interface TradeCalendarProps {
 export function TradeCalendar({ trades }: TradeCalendarProps) {
   const currency = useTradeStore((s) => s.currency)
   const showValues = useTradeStore((s) => s.showValues)
+  const [viewDate, setViewDate] = useState(new Date())
 
   const { weeks, monthLabel } = useMemo(() => {
-    const now = new Date()
-    const year = now.getFullYear()
-    const month = now.getMonth()
+    const year = viewDate.getFullYear()
+    const month = viewDate.getMonth()
 
     const firstDay = new Date(year, month, 1)
     const lastDay = new Date(year, month + 1, 0)
@@ -50,7 +52,19 @@ export function TradeCalendar({ trades }: TradeCalendarProps) {
       weeks,
       monthLabel: `${MONTH_NAMES[month]} ${year}`,
     }
-  }, [trades])
+  }, [trades, viewDate])
+
+  function goBack() {
+    setViewDate((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))
+  }
+
+  function goForward() {
+    setViewDate((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))
+  }
+
+  function goToday() {
+    setViewDate(new Date())
+  }
 
   function getCellBg(pnl: number, hasTrades: boolean): string {
     if (!hasTrades) return "bg-muted/30"
@@ -78,7 +92,20 @@ export function TradeCalendar({ trades }: TradeCalendarProps) {
 
   return (
     <div className="w-full">
-      <h3 className="mb-3 text-sm font-medium text-muted-foreground">{monthLabel}</h3>
+      <div className="mb-3 flex items-center justify-between">
+        <h3 className="text-sm font-medium text-muted-foreground">{monthLabel}</h3>
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="icon-xs" onClick={goBack} aria-label="Previous month">
+            <ChevronLeftIcon className="size-4" />
+          </Button>
+          <Button variant="ghost" size="xs" onClick={goToday} className="text-xs">
+            Today
+          </Button>
+          <Button variant="ghost" size="icon-xs" onClick={goForward} aria-label="Next month">
+            <ChevronRightIcon className="size-4" />
+          </Button>
+        </div>
+      </div>
       <div className="grid grid-cols-7 gap-1">
         {DAY_NAMES.map((name) => (
           <div key={name} className="text-center text-xs font-medium text-muted-foreground py-1">

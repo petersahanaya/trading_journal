@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Lexend, Geist_Mono } from "next/font/google"
 import { ThemeProvider } from "@/providers/theme-provider"
 import { Navbar } from "@/components/layout/navbar"
@@ -27,6 +27,13 @@ export const metadata: Metadata = {
   other: {
     "mobile-web-app-capable": "yes",
   },
+}
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 }
 
 export default function RootLayout({

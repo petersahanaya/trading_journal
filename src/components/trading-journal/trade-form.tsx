@@ -308,7 +308,7 @@ export function TradeForm({ onAddTrade, onEditTrade, editTrade, open: controlled
   if (isMobile) {
     return (
       <Sheet open={open} onOpenChange={setOpen}>
-        {!controlledOpen && (
+        {controlledOpen === undefined && (
           <SheetTrigger
             render={
               <Button variant={isEditing ? "ghost" : "default"} size={isEditing ? "icon-sm" : "default"}>
@@ -334,7 +334,7 @@ export function TradeForm({ onAddTrade, onEditTrade, editTrade, open: controlled
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      {!controlledOpen && (
+      {controlledOpen === undefined && (
         <DialogTrigger
           render={
             <Button variant={isEditing ? "ghost" : "default"} size={isEditing ? "icon-sm" : "default"}>
