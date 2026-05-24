@@ -24,6 +24,11 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
     title: "Trading Journal",
   },
+  icons: {
+    apple: [
+      { url: "/icons/apple-icon-180.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
   other: {
     "mobile-web-app-capable": "yes",
   },
