@@ -4,9 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Trade } from "@/lib/types"
 import { calculateWinRate, calculateTotalPnl, calculateTotalTrades, calculateOpenTrades } from "@/lib/data"
 import { formatCurrency } from "@/lib/currency"
-import { TrendingUp, TrendingDown, BarChart3, BookOpen } from "lucide-react"
+import { TrendingUp, TrendingDown, BarChart3, BookOpen, Eye, EyeOff } from "lucide-react"
 import { useTradeStore } from "@/store/trade-store"
 import { useMediaQuery } from "@/hooks/use-media-query"
+import { Button } from "@/components/ui/button"
 
 interface DashboardStatsProps {
   trades: Trade[]
@@ -20,6 +21,8 @@ function HiddenValue({ children }: { children: React.ReactNode }) {
 
 export function DashboardStats({ trades }: DashboardStatsProps) {
   const currency = useTradeStore((s) => s.currency)
+  const showValues = useTradeStore((s) => s.showValues)
+  const toggleValues = useTradeStore((s) => s.toggleShowValues)
   const isMobile = useMediaQuery("(max-width: 767px)")
   const winRate = calculateWinRate(trades)
   const totalPnl = calculateTotalPnl(trades)
@@ -50,52 +53,69 @@ export function DashboardStats({ trades }: DashboardStatsProps) {
     },
   ]
 
+  const eyeButton = (
+    <Button
+      variant="ghost"
+      size="icon-sm"
+      onClick={toggleValues}
+      aria-label={showValues ? "Hide values" : "Show values"}
+    >
+      {showValues ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+    </Button>
+  )
+
   if (isMobile) {
     return (
-      <div className="rounded-2xl bg-card shadow-sm overflow-hidden divide-y divide-border">
-        {stats.map((stat) => {
-          const Icon = stat.icon
-          return (
-            <div key={stat.title} className="flex items-center justify-between px-4 py-3">
-              <div className="flex items-center gap-3">
-                <div className="flex size-8 items-center justify-center rounded-full bg-muted">
-                  <Icon className={`h-4 w-4 ${stat.variant ?? "text-muted-foreground"}`} />
+      <div className="space-y-2">
+        <div className="flex justify-end">{eyeButton}</div>
+        <div className="rounded-2xl bg-card shadow-sm overflow-hidden divide-y divide-border">
+          {stats.map((stat) => {
+            const Icon = stat.icon
+            return (
+              <div key={stat.title} className="flex items-center justify-between px-4 py-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex size-8 items-center justify-center rounded-full bg-muted">
+                    <Icon className={`h-4 w-4 ${stat.variant ?? "text-muted-foreground"}`} />
+                  </div>
+                  <span className="text-sm text-foreground">{stat.title}</span>
                 </div>
-                <span className="text-sm text-foreground">{stat.title}</span>
+                <HiddenValue>
+                  <span className={`text-sm font-semibold tabular-nums ${stat.variant ?? ""}`}>
+                    {stat.value}
+                  </span>
+                </HiddenValue>
               </div>
-              <HiddenValue>
-                <span className={`text-sm font-semibold tabular-nums ${stat.variant ?? ""}`}>
-                  {stat.value}
-                </span>
-              </HiddenValue>
-            </div>
-          )
-        })}
+            )
+          })}
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {stats.map((stat) => (
-        <Card key={stat.title} size="sm">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {stat.title}
-              </CardTitle>
-              <stat.icon className={`h-4 w-4 ${stat.variant ?? "text-muted-foreground"}`} />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <HiddenValue>
-              <div className={`text-2xl font-bold ${stat.variant ?? ""}`}>
-                {stat.value}
+    <div className="space-y-2">
+      <div className="flex justify-end">{eyeButton}</div>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {stats.map((stat) => (
+          <Card key={stat.title} size="sm">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  {stat.title}
+                </CardTitle>
+                <stat.icon className={`h-4 w-4 ${stat.variant ?? "text-muted-foreground"}`} />
               </div>
-            </HiddenValue>
-          </CardContent>
-        </Card>
-      ))}
+            </CardHeader>
+            <CardContent>
+              <HiddenValue>
+                <div className={`text-2xl font-bold ${stat.variant ?? ""}`}>
+                  {stat.value}
+                </div>
+              </HiddenValue>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   )
 }

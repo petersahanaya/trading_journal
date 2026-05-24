@@ -2,10 +2,8 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { TrendingUpIcon, BarChart3Icon, SettingsIcon, EyeIcon, EyeOffIcon } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { TrendingUpIcon, BarChart3Icon, SettingsIcon } from "lucide-react"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
-import { useTradeStore } from "@/store/trade-store"
 import { cn } from "@/lib/utils"
 
 const navLinks = [
@@ -16,8 +14,6 @@ const navLinks = [
 
 export function Navbar() {
   const pathname = usePathname()
-  const showValues = useTradeStore((s) => s.showValues)
-  const toggleShowValues = useTradeStore((s) => s.toggleShowValues)
 
   return (
     <header className="sticky top-0 z-40 hidden w-full border-b bg-background/80 backdrop-blur-md md:block supports-backdrop-filter:bg-background/60">
@@ -51,9 +47,6 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon-sm" onClick={toggleShowValues} aria-label="Toggle values">
-            {showValues ? <EyeOffIcon className="size-4" /> : <EyeIcon className="size-4" />}
-          </Button>
           <ThemeToggle />
         </div>
       </div>
