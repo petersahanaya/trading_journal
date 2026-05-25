@@ -1,8 +1,6 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 import { Trade, CashflowEntry } from "@/lib/types"
-import { trades as initialTrades } from "@/lib/data"
-
 export type Currency = "usd" | "idr" | "cent"
 
 interface TradeStore {
@@ -29,11 +27,11 @@ interface TradeStore {
 export const useTradeStore = create<TradeStore>()(
   persist(
     (set, get) => ({
-      trades: initialTrades,
+      trades: [],
       cashflow: [],
       currency: "usd",
       showValues: true,
-      accounts: ["Main", "Long-term", "Short-term", "Crypto", "Forex"],
+      accounts: [],
       addTrade: (trade) => set((state) => ({ trades: [trade, ...state.trades] })),
       updateTrade: (id, updated) =>
         set((state) => ({

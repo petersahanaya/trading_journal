@@ -226,7 +226,7 @@ export function TradeForm({ onAddTrade, onEditTrade, editTrade, open: controlled
         </div>
         <div className="grid gap-2">
           <Label htmlFor="lots">Lots</Label>
-          <Input id="lots" type="number" step="0.1" placeholder="1.0" {...register("lots")} aria-invalid={!!errors.lots} />
+          <Input id="lots" type="number" step="0.01" placeholder="1.00" {...register("lots")} aria-invalid={!!errors.lots} />
           {errors.lots && <p className="text-xs text-destructive">{errors.lots.message}</p>}
         </div>
       </div>

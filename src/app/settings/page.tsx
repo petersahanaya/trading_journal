@@ -69,7 +69,7 @@ export default function SettingsPage() {
   const [cfType, setCfType] = useState<"deposit" | "withdrawal">("deposit")
   const [cfAmount, setCfAmount] = useState("")
   const [cfDate, setCfDate] = useState(new Date().toISOString().split("T")[0])
-  const [cfAccount, setCfAccount] = useState("Main")
+  const [cfAccount, setCfAccount] = useState("")
   const [cfNotes, setCfNotes] = useState("")
   const fileInputRef = useRef<HTMLInputElement>(null)
 

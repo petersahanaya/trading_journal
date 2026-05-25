@@ -7,10 +7,10 @@ import { calculatePositionSize } from "@/lib/data"
 import { CalculatorIcon } from "lucide-react"
 
 export function PositionSizingCalculator() {
-  const [balance, setBalance] = useState("10000")
-  const [riskPercent, setRiskPercent] = useState("1")
-  const [entry, setEntry] = useState("100")
-  const [stop, setStop] = useState("95")
+  const [balance, setBalance] = useState("")
+  const [riskPercent, setRiskPercent] = useState("")
+  const [entry, setEntry] = useState("")
+  const [stop, setStop] = useState("")
 
   const b = Number(balance)
   const r = Number(riskPercent)
