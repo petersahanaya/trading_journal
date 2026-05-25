@@ -1,16 +1,25 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Trade } from "@/lib/types"
-import { calculateWinRate, calculateTotalPnl, calculateTotalTrades, calculateOpenTrades } from "@/lib/data"
+import { Trade, CashflowEntry } from "@/lib/types"
+import {
+  calculateWinRate,
+  calculateTotalPnl,
+  calculateTotalTrades,
+  calculateOpenTrades,
+  calculateTotalDeposits,
+  calculateTotalWithdrawals,
+  calculatePnlPercent,
+} from "@/lib/data"
 import { formatCurrency } from "@/lib/currency"
-import { TrendingUp, TrendingDown, BarChart3, BookOpen, Eye, EyeOff } from "lucide-react"
+import { TrendingUp, TrendingDown, BarChart3, BookOpen, Wallet, ArrowDownToLine, ArrowUpFromLine, Eye, EyeOff } from "lucide-react"
 import { useTradeStore } from "@/store/trade-store"
 import { useMediaQuery } from "@/hooks/use-media-query"
 import { Button } from "@/components/ui/button"
 
 interface DashboardStatsProps {
   trades: Trade[]
+  cashflow: CashflowEntry[]
 }
 
 function HiddenValue({ children }: { children: React.ReactNode }) {
@@ -19,7 +28,7 @@ function HiddenValue({ children }: { children: React.ReactNode }) {
   return <span className="select-none">****</span>
 }
 
-export function DashboardStats({ trades }: DashboardStatsProps) {
+export function DashboardStats({ trades, cashflow }: DashboardStatsProps) {
   const currency = useTradeStore((s) => s.currency)
   const showValues = useTradeStore((s) => s.showValues)
   const toggleValues = useTradeStore((s) => s.toggleShowValues)
@@ -28,6 +37,10 @@ export function DashboardStats({ trades }: DashboardStatsProps) {
   const totalPnl = calculateTotalPnl(trades)
   const totalTrades = calculateTotalTrades(trades)
   const openTrades = calculateOpenTrades(trades)
+  const totalDeposits = calculateTotalDeposits(cashflow)
+  const totalWithdrawals = calculateTotalWithdrawals(cashflow)
+  const pnlPercent = calculatePnlPercent(totalPnl, totalDeposits)
+  const netCashflow = totalDeposits - totalWithdrawals
 
   const stats = [
     {
@@ -36,6 +49,12 @@ export function DashboardStats({ trades }: DashboardStatsProps) {
       icon: totalPnl >= 0 ? TrendingUp : TrendingDown,
       variant: totalPnl >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400",
     },
+    ...(pnlPercent !== null ? [{
+      title: "P&L %",
+      value: `${pnlPercent > 0 ? "+" : ""}${pnlPercent}%`,
+      icon: totalPnl >= 0 ? TrendingUp : TrendingDown,
+      variant: totalPnl >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400",
+    }] : []),
     {
       title: "Win Rate",
       value: `${winRate}%`,
@@ -50,6 +69,24 @@ export function DashboardStats({ trades }: DashboardStatsProps) {
       title: "Open Positions",
       value: openTrades.toString(),
       icon: BookOpen,
+    },
+    {
+      title: "Deposits",
+      value: formatCurrency(totalDeposits, currency),
+      icon: ArrowDownToLine,
+      variant: "text-green-600 dark:text-green-400",
+    },
+    {
+      title: "Withdrawals",
+      value: formatCurrency(totalWithdrawals, currency),
+      icon: ArrowUpFromLine,
+      variant: "text-red-600 dark:text-red-400",
+    },
+    {
+      title: "Net Cashflow",
+      value: formatCurrency(netCashflow, currency),
+      icon: Wallet,
+      variant: netCashflow >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400",
     },
   ]
 

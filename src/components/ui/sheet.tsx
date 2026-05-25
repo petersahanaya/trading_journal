@@ -55,24 +55,26 @@ function SheetContent({
   return (
     <SheetPortal>
       <SheetOverlay />
-      <Drawer.Popup
-        data-slot="sheet-content"
-        className={cn(
-          "fixed z-50 gap-4 bg-popover p-4 text-popover-foreground shadow-lg ring-1 ring-foreground/10 duration-100 outline-none",
-          sideStyles[side],
-          className
-        )}
-        {...props}
-      >
-        {children}
-        <Drawer.Close
-          data-slot="sheet-close"
-          className="absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100"
+      <Drawer.Viewport>
+        <Drawer.Popup
+          data-slot="sheet-content"
+          className={cn(
+            "fixed z-50 gap-4 bg-popover p-4 text-popover-foreground shadow-lg ring-1 ring-foreground/10 duration-100 outline-none",
+            sideStyles[side],
+            className
+          )}
+          {...props}
         >
-          <XIcon className="size-4" />
-          <span className="sr-only">Close</span>
-        </Drawer.Close>
-      </Drawer.Popup>
+          {children}
+          <Drawer.Close
+            data-slot="sheet-close"
+            className="absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100"
+          >
+            <XIcon className="size-4" />
+            <span className="sr-only">Close</span>
+          </Drawer.Close>
+        </Drawer.Popup>
+      </Drawer.Viewport>
     </SheetPortal>
   )
 }

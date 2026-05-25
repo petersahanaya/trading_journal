@@ -1,4 +1,4 @@
-import { Trade } from "./types"
+import { Trade, CashflowEntry } from "./types"
 
 export const trades: Trade[] = [
   {
@@ -123,6 +123,23 @@ export interface PositionSizeResult {
   positionSize: number
   totalRisk: number
   shares: number
+}
+
+export function calculateTotalDeposits(cashflow: CashflowEntry[]): number {
+  return cashflow
+    .filter((e) => e.type === "deposit")
+    .reduce((sum, e) => sum + e.amount, 0)
+}
+
+export function calculateTotalWithdrawals(cashflow: CashflowEntry[]): number {
+  return cashflow
+    .filter((e) => e.type === "withdrawal")
+    .reduce((sum, e) => sum + e.amount, 0)
+}
+
+export function calculatePnlPercent(pnl: number, deposits: number): number | null {
+  if (deposits <= 0) return null
+  return Math.round((pnl / deposits) * 10000) / 100
 }
 
 export function calculatePositionSize(

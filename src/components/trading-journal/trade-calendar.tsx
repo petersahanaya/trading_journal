@@ -7,8 +7,10 @@ import { useTradeStore } from "@/store/trade-store"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
+import { useMediaQuery } from "@/hooks/use-media-query"
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+const DAY_NAMES_SHORT = ["S", "M", "T", "W", "T", "F", "S"]
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
 interface TradeCalendarProps {
@@ -19,6 +21,7 @@ export function TradeCalendar({ trades }: TradeCalendarProps) {
   const currency = useTradeStore((s) => s.currency)
   const showValues = useTradeStore((s) => s.showValues)
   const [viewDate, setViewDate] = useState(new Date())
+  const isMobile = useMediaQuery("(max-width: 767px)")
 
   const { weeks, monthLabel } = useMemo(() => {
     const year = viewDate.getFullYear()
@@ -66,96 +69,81 @@ export function TradeCalendar({ trades }: TradeCalendarProps) {
     setViewDate(new Date())
   }
 
-  function getCellBg(pnl: number, hasTrades: boolean): string {
-    if (!hasTrades) return "bg-muted/30"
-    if (pnl === 0) return "bg-muted/50"
-    if (pnl > 0) {
-      if (pnl > 500) return "bg-green-500 dark:bg-green-400"
-      if (pnl > 100) return "bg-green-400 dark:bg-green-500"
-      return "bg-green-200 dark:bg-green-700"
-    }
-    if (pnl < -500) return "bg-red-500 dark:bg-red-400"
-    if (pnl < -100) return "bg-red-400 dark:bg-red-500"
-    return "bg-red-200 dark:bg-red-700"
-  }
-
-  function getTextColor(pnl: number, hasTrades: boolean): string {
-    if (!hasTrades) return "text-muted-foreground"
-    if (pnl === 0) return "text-muted-foreground"
-    if (pnl > 0) {
-      if (pnl > 100) return "text-white"
-      return "text-green-900 dark:text-green-100"
-    }
-    if (pnl < -100) return "text-white"
-    return "text-red-900 dark:text-red-100"
-  }
+  const today = new Date()
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`
 
   return (
     <div className="w-full">
-      <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-sm font-medium text-muted-foreground">{monthLabel}</h3>
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-foreground">{monthLabel}</h3>
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon-xs" onClick={goBack} aria-label="Previous month">
+          <Button variant="ghost" size="icon-xs" onClick={goBack} aria-label="Previous month" className="rounded-full">
             <ChevronLeftIcon className="size-4" />
           </Button>
-          <Button variant="ghost" size="xs" onClick={goToday} className="text-xs">
+          <Button variant="ghost" size="xs" onClick={goToday} className="text-xs rounded-lg">
             Today
           </Button>
-          <Button variant="ghost" size="icon-xs" onClick={goForward} aria-label="Next month">
+          <Button variant="ghost" size="icon-xs" onClick={goForward} aria-label="Next month" className="rounded-full">
             <ChevronRightIcon className="size-4" />
           </Button>
         </div>
       </div>
-      <div className="grid grid-cols-7 gap-1">
-        {DAY_NAMES.map((name) => (
-          <div key={name} className="text-center text-xs font-medium text-muted-foreground py-1">
+      <div className="grid grid-cols-7 gap-px sm:gap-1">
+        {(isMobile ? DAY_NAMES_SHORT : DAY_NAMES).map((name, i) => (
+          <div key={DAY_NAMES[i]} className="text-center text-[10px] sm:text-xs font-medium text-on-surface-variant py-1">
             {name}
           </div>
         ))}
         {weeks.map((week, wi) =>
-          week.map((day, di) => (
-            <div
-              key={`${wi}-${di}`}
-              className={cn(
-                "min-h-[3.5rem] rounded-md flex flex-col items-center justify-center text-xs relative group cursor-default px-0.5",
-                day.day === 0 ? "invisible" : getCellBg(day.pnl, day.tradeCount > 0)
-              )}
-            >
-              <span className={cn("font-medium leading-tight", getTextColor(day.pnl, day.tradeCount > 0))}>
-                {day.day}
-              </span>
-              {day.tradeCount > 0 && (
+          week.map((day, di) => {
+            const hasTrades = day.tradeCount > 0
+            const isToday = day.date === todayStr
+            const pnlColor = hasTrades
+              ? day.pnl > 0 ? "bg-green-500" : day.pnl < 0 ? "bg-red-500" : "bg-outline-variant"
+              : null
+
+            return (
+              <div
+                key={`${wi}-${di}`}
+                className={cn(
+                  "min-h-[2.5rem] sm:min-h-[3.5rem] rounded-xl flex flex-col items-center justify-center text-[11px] sm:text-xs relative group cursor-default px-px sm:px-0.5 transition-colors",
+                  day.day === 0 ? "invisible" : hasTrades ? "bg-surface-container-low" : "bg-transparent",
+                  isToday && "ring-1 ring-primary/30"
+                )}
+              >
                 <span
                   className={cn(
-                    "text-[10px] leading-tight mt-0.5 truncate max-w-full px-0.5",
-                    getTextColor(day.pnl, day.tradeCount > 0)
+                    "font-medium leading-tight",
+                    hasTrades ? "text-foreground" : "text-on-surface-variant",
+                    isToday && "text-primary"
                   )}
                 >
-                  {showValues ? formatCurrency(day.pnl, currency) : "****"}
+                  {day.day}
                 </span>
-              )}
-            </div>
-          ))
+                {hasTrades && pnlColor && (
+                  <div className="flex gap-0.5 mt-0.5">
+                    <span className={cn("size-1.5 rounded-full", pnlColor)} />
+                  </div>
+                )}
+                {hasTrades && !isMobile && (
+                  <span className="text-[9px] leading-tight mt-0.5 text-on-surface-variant truncate max-w-full px-0.5">
+                    {showValues ? formatCurrency(day.pnl, currency) : "****"}
+                  </span>
+                )}
+              </div>
+            )
+          })
         )}
       </div>
-      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] sm:text-xs text-on-surface-variant">
         <span className="flex items-center gap-1">
-          <span className="size-3 rounded bg-green-200 dark:bg-green-700" /> Low +
+          <span className="size-2 rounded-full bg-green-500" /> Profitable
         </span>
         <span className="flex items-center gap-1">
-          <span className="size-3 rounded bg-green-400 dark:bg-green-500" /> Med +
+          <span className="size-2 rounded-full bg-red-500" /> Losing
         </span>
         <span className="flex items-center gap-1">
-          <span className="size-3 rounded bg-green-500 dark:bg-green-400" /> High +
-        </span>
-        <span className="flex items-center gap-1">
-          <span className="size-3 rounded bg-red-200 dark:bg-red-700" /> Low -
-        </span>
-        <span className="flex items-center gap-1">
-          <span className="size-3 rounded bg-red-400 dark:bg-red-500" /> Med -
-        </span>
-        <span className="flex items-center gap-1">
-          <span className="size-3 rounded bg-red-500 dark:bg-red-400" /> High -
+          <span className="size-2 rounded-full bg-outline-variant" /> Breakeven
         </span>
       </div>
     </div>

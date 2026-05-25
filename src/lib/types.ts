@@ -1,5 +1,6 @@
 export type TradeDirection = "long" | "short"
 export type TradeStatus = "open" | "closed"
+export type CashflowType = "deposit" | "withdrawal"
 
 export interface Trade {
   id: string
@@ -16,4 +17,13 @@ export interface Trade {
   stopLoss: number | null
   takeProfit: number | null
   account: string
+}
+
+export interface CashflowEntry {
+  id: string
+  type: CashflowType
+  amount: number
+  date: string
+  account: string
+  notes: string
 }

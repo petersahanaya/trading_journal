@@ -14,19 +14,41 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart"
 import { Trade } from "@/lib/types"
 import { formatCurrency } from "@/lib/currency"
 import { useTradeStore } from "@/store/trade-store"
+import { useMediaQuery } from "@/hooks/use-media-query"
+import { useEffect, useState } from "react"
+import { cn } from "@/lib/utils"
 
 interface TradeChartsProps {
   trades: Trade[]
 }
 
+function ChartCard({
+  title,
+  children,
+  className,
+}: {
+  title: string
+  children: React.ReactNode
+  className?: string
+}) {
+  return (
+    <div className={cn("rounded-2xl border border-outline-variant/40 bg-card p-5 shadow-sm", className)}>
+      <h3 className="mb-4 text-sm font-semibold text-foreground">{title}</h3>
+      {children}
+    </div>
+  )
+}
+
 export function TradeCharts({ trades }: TradeChartsProps) {
   const currency = useTradeStore((s) => s.currency)
   const showValues = useTradeStore((s) => s.showValues)
+  const isMobile = useMediaQuery("(max-width: 767px)")
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
   const fmt = showValues ? (v: number) => formatCurrency(v, currency) : () => "****"
   const closedTrades = trades.filter((t) => t.status === "closed" && t.pnl !== null)
 
@@ -52,35 +74,29 @@ export function TradeCharts({ trades }: TradeChartsProps) {
   ]
 
   return (
-    <div className="grid gap-4 md:grid-cols-2">
-      <Card>
-        <CardHeader>
-          <CardTitle>Cumulative P&L</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer className="h-64">
+    <div className="bento-grid">
+      <ChartCard title="Cumulative P&L" className="col-span-full lg:col-span-6">
+        <ChartContainer className="h-48 sm:h-56">
+          {mounted && (
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={pnlOverTime}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                <XAxis dataKey="date" className="text-xs text-muted-foreground" />
-                <YAxis className="text-xs text-muted-foreground" />
+                <CartesianGrid strokeDasharray="3 3" className="stroke-outline-variant/50" />
+                <XAxis dataKey="date" className="text-[10px] sm:text-xs text-on-surface-variant" />
+                <YAxis className="text-[10px] sm:text-xs text-on-surface-variant" />
                 <Tooltip content={<ChartTooltipContent formatter={(v) => fmt(v)} />} />
-                <Line type="monotone" dataKey="cumulative" stroke="hsl(var(--foreground))" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="cumulative" stroke="var(--color-primary)" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
-          </ChartContainer>
-        </CardContent>
-      </Card>
+          )}
+        </ChartContainer>
+      </ChartCard>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Win / Loss</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer className="h-64">
+      <ChartCard title="Win / Loss" className="col-span-full lg:col-span-3">
+        <ChartContainer className="h-48 sm:h-56">
+          {mounted && (
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={winLossData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={90}>
+                <Pie data={winLossData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={isMobile ? 40 : 55} outerRadius={isMobile ? 65 : 80}>
                   {winLossData.map((entry) => (
                     <Cell key={entry.name} fill={entry.color} />
                   ))}
@@ -88,55 +104,53 @@ export function TradeCharts({ trades }: TradeChartsProps) {
                 <Tooltip content={<ChartTooltipContent formatter={(v) => showValues ? `${v}` : "****"} />} />
               </PieChart>
             </ResponsiveContainer>
-          </ChartContainer>
-          <div className="mt-2 flex justify-center gap-4 text-sm">
-            <span className="flex items-center gap-1">
-              <span className="size-2 rounded-full bg-green-500" /> Wins: {wins}
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="size-2 rounded-full bg-red-500" /> Losses: {losses}
-            </span>
-          </div>
-        </CardContent>
-      </Card>
+          )}
+        </ChartContainer>
+        <div className="mt-2 flex justify-center gap-4 text-xs">
+          <span className="flex items-center gap-1">
+            <span className="size-2 rounded-full bg-green-500" /> Wins: {wins}
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="size-2 rounded-full bg-red-500" /> Losses: {losses}
+          </span>
+        </div>
+      </ChartCard>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>P&L by Direction</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer className="h-64">
+      <ChartCard title="P&L by Direction" className="col-span-full lg:col-span-3">
+        <ChartContainer className="h-48 sm:h-56">
+          {mounted && (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={pnlDistribution}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                <XAxis dataKey="name" className="text-xs text-muted-foreground" />
-                <YAxis className="text-xs text-muted-foreground" />
+                <CartesianGrid strokeDasharray="3 3" className="stroke-outline-variant/50" />
+                <XAxis dataKey="name" className="text-[10px] sm:text-xs text-on-surface-variant" />
+                <YAxis className="text-[10px] sm:text-xs text-on-surface-variant" />
                 <Tooltip content={<ChartTooltipContent formatter={(v) => fmt(v)} />} />
-                <Bar dataKey="value" fill="hsl(var(--foreground))" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                  {pnlDistribution.map((_, i) => (
+                    <Cell key={i} fill={i === 0 ? "var(--color-chart-1)" : "var(--color-chart-2)"} />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
-          </ChartContainer>
-        </CardContent>
-      </Card>
+          )}
+        </ChartContainer>
+      </ChartCard>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Trade Frequency</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer className="h-64">
+      <ChartCard title="Trade Frequency" className="col-span-full lg:col-span-6">
+        <ChartContainer className="h-48 sm:h-56">
+          {mounted && (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={getTradeFrequencyData(trades)}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                <XAxis dataKey="date" className="text-xs text-muted-foreground" />
-                <YAxis className="text-xs text-muted-foreground" allowDecimals={false} />
+                <CartesianGrid strokeDasharray="3 3" className="stroke-outline-variant/50" />
+                <XAxis dataKey="date" className="text-[10px] sm:text-xs text-on-surface-variant" />
+                <YAxis className="text-[10px] sm:text-xs text-on-surface-variant" allowDecimals={false} />
                 <Tooltip />
-                <Bar dataKey="count" fill="hsl(var(--foreground))" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="count" fill="var(--color-chart-1)" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
-          </ChartContainer>
-        </CardContent>
-      </Card>
+          )}
+        </ChartContainer>
+      </ChartCard>
     </div>
   )
 }
