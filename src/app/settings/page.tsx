@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { DownloadIcon, UploadIcon, AlertTriangleIcon, PlusIcon, Trash2Icon, ArrowDownToLine, ArrowUpFromLine, CurrencyIcon, WalletIcon, DatabaseIcon, SlidersIcon, MoonIcon, SunIcon } from "lucide-react"
-import { getCurrencyLabel, formatCurrency } from "@/lib/currency"
+import { getCurrencyLabel, formatCurrency, currencyConfig } from "@/lib/currency"
 import { PositionSizingCalculator } from "@/components/trading-journal/position-sizing"
 import { cn } from "@/lib/utils"
 
@@ -111,10 +111,11 @@ export default function SettingsPage() {
   function handleAddCashflow() {
     const amount = Number.parseFloat(cfAmount)
     if (!amount || amount <= 0) return
+    const baseAmount = amount / currencyConfig[currency].centFactor
     const entry: CashflowEntry = {
       id: crypto.randomUUID(),
       type: cfType,
-      amount,
+      amount: baseAmount,
       date: cfDate,
       account: cfAccount,
       notes: cfNotes,

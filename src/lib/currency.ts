@@ -1,6 +1,6 @@
 import { type Currency } from "@/store/trade-store"
 
-const currencyConfig = {
+export const currencyConfig = {
   usd: { symbol: "$", code: "USD", decimals: 2, centFactor: 1 },
   cent: { symbol: "¢", code: "cent", decimals: 0, centFactor: 100 },
   idr: { symbol: "Rp", code: "IDR", decimals: 0, centFactor: 16000 },
