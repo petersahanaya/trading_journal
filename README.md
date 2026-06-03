@@ -2,6 +2,12 @@
 
 A modern trading journal built with Next.js to track, analyze, and improve your trading performance.
 
+<img width="1906" height="1337" alt="PnL_Dashboard" src="https://github.com/user-attachments/assets/7dea1f0f-9692-44d5-a934-df9906a11315" />
+
+<img width="1906" height="1570" alt="PnL_Analytics" src="https://github.com/user-attachments/assets/95f071ab-9cff-4a2e-8494-301e97ad853f" />
+
+<img width="1906" height="1360" alt="PnL_Settings" src="https://github.com/user-attachments/assets/3c95abc1-9dd0-46fd-b967-efc86d320d7b" />
+
 ## Features
 
 - **Dashboard** — View key stats (P&L, win rate, open positions) and your full trade history
